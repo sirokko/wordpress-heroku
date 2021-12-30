@@ -76,33 +76,33 @@ register_rest_field('race', 'rankings', array(
     foreach ($object['modalities'] as $modality):
       $rankings[$modality->slug] = $wpdb->get_results(
         $wpdb->prepare("
-          select
-            users.ID as id,
-            users.display_name as name,
-            truncate(session_average_speed_kmh.meta_value, 2) as average_speed_kmh,
-            truncate(session_duration_minutes.meta_value, 2) as duration_minutes,
-            truncate(session_distance_km.meta_value, 2) as distance_km
-          from {$wpdb->posts} as sessions
-          join {$wpdb->users} as users on sessions.post_author = users.ID
-          left join {$wpdb->usermeta} as race_payment on (users.ID = race_payment.user_id and race_payment.meta_key = 'race_payments' and race_payment.meta_value = '{$object['id']}')
-          join {$wpdb->posts} as race on sessions.post_parent = race.ID
-          join {$wpdb->postmeta} as session_average_speed_kmh on (session_average_speed_kmh.post_id = sessions.ID and session_average_speed_kmh.meta_key = 'average_speed_kmh')
-          join {$wpdb->postmeta} as session_duration_minutes on (session_duration_minutes.post_id = sessions.ID and session_duration_minutes.meta_key = 'duration_minutes')
-          join {$wpdb->postmeta} as session_distance_km on (session_distance_km.post_id = sessions.ID and session_distance_km.meta_key = 'distance_km')
-          join {$wpdb->postmeta} as race_distance_km on (race_distance_km.post_id = race.ID and race_distance_km.meta_key = 'distance_km')
-          left join {$wpdb->postmeta} as race_oid on (race_oid.post_id = race.ID and race_oid.meta_key = 'oid')
-          join {$wpdb->term_relationships} as term_relationships on (sessions.ID = term_relationships.object_id)
-          join {$wpdb->term_taxonomy} as term_taxonomies on (term_relationships.term_taxonomy_id = term_taxonomies.term_taxonomy_id)
-          where sessions.post_type = 'session'
-          and sessions.post_status = 'publish'
-          and sessions.post_parent = {$object['id']}
-          and term_taxonomies.term_id = {$modality->term_id}
-          and (isnull(race_distance_km.meta_value) or session_distance_km.meta_value >= race_distance_km.meta_value)
-          and (isnull(if(race_oid.meta_value, race_oid.meta_value, null)) or race_payment.meta_value is not null)
-          and session_average_speed_kmh.meta_value > 0
-          and session_duration_minutes.meta_value > 0
-          and session_distance_km.meta_value > 0
-          group by users.ID
+          SELECT
+            users.ID AS id,
+            users.display_name AS name,
+            TRUNCATE(averages.meta_value, 2) AS average_speed_kmh,
+            TRUNCATE(durations.meta_value, 2) AS duration_minutes,
+            TRUNCATE(distances.meta_value, 2) AS distance_km
+          FROM {$wpdb->posts} AS sessions
+          JOIN {$wpdb->users} AS users ON sessions.post_author = users.ID
+          LEFT JOIN {$wpdb->usermeta} AS race_payment ON (users.ID = race_payment.user_id and race_payment.meta_key = 'race_payments' and race_payment.meta_value = '{$object['id']}')
+          JOIN {$wpdb->posts} AS race ON sessions.post_parent = race.ID
+          JOIN {$wpdb->postmeta} AS averages ON (session_average_speed_kmh.post_id = sessions.ID and session_average_speed_kmh.meta_key = 'average_speed_kmh')
+          JOIN {$wpdb->postmeta} AS session_duration_minutes ON (session_duration_minutes.post_id = sessions.ID and session_duration_minutes.meta_key = 'duration_minutes')
+          JOIN {$wpdb->postmeta} AS session_distance_km ON (session_distance_km.post_id = sessions.ID and session_distance_km.meta_key = 'distance_km')
+          JOIN {$wpdb->postmeta} AS race_distance_km ON (race_distance_km.post_id = race.ID and race_distance_km.meta_key = 'distance_km')
+          LEFT JOIN {$wpdb->postmeta} AS race_oid ON (race_oid.post_id = race.ID and race_oid.meta_key = 'oid')
+          JOIN {$wpdb->term_relationships} AS term_relationships ON sessions.ID = term_relationships.object_id
+          JOIN {$wpdb->term_taxonomy} AS term_taxonomies ON term_relationships.term_taxonomy_id = term_taxonomies.term_taxonomy_id
+          WHERE sessions.post_type = 'session' AND
+            sessions.post_status = 'publish' AND
+            sessions.post_parent = {$object['id']} AND
+            term_taxonomies.term_id = {$modality->term_id} AND
+            (ISNULL(race_distance_km.meta_value) OR TRUNCATE(session_distance_km.meta_value, 2) >= TRUNCATE(race_distance_km.meta_value, 2)) AND
+            (ISNULL(IF(race_oid.meta_value, race_oid.meta_value, NULL)) OR race_payment.meta_value IS NOT NULL)
+            session_average_speed_kmh.meta_value > 0 AND
+            session_duration_minutes.meta_value > 0 AND
+            session_distance_km.meta_value > 0
+          group by id
           order by duration_minutes asc
         "),
         ARRAY_A
