@@ -64,6 +64,8 @@ register_rest_field('race', 'modalities', array(
   }
 ));
 
+// join {$wpdb->postmeta} as race_duration_minutes on (race_duration_minutes.post_id = race.ID and race_duration_minutes.meta_key = 'duration_minutes')
+
 register_rest_field('race', 'rankings', array(
   'schema' => null,
   'update_callback' => null,
@@ -88,7 +90,6 @@ register_rest_field('race', 'rankings', array(
           join {$wpdb->postmeta} as session_duration_minutes on (session_duration_minutes.post_id = sessions.ID and session_duration_minutes.meta_key = 'duration_minutes')
           join {$wpdb->postmeta} as session_distance_km on (session_distance_km.post_id = sessions.ID and session_distance_km.meta_key = 'distance_km')
           join {$wpdb->postmeta} as race_distance_km on (race_distance_km.post_id = race.ID and race_distance_km.meta_key = 'distance_km')
-          join {$wpdb->postmeta} as race_duration_minutes on (race_duration_minutes.post_id = race.ID and race_duration_minutes.meta_key = 'duration_minutes')
           left join {$wpdb->postmeta} as race_oid on (race_oid.post_id = race.ID and race_oid.meta_key = 'oid')
           join {$wpdb->term_relationships} as term_relationships on (sessions.ID = term_relationships.object_id)
           join {$wpdb->term_taxonomy} as term_taxonomies on (term_relationships.term_taxonomy_id = term_taxonomies.term_taxonomy_id)
