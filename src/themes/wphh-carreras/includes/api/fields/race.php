@@ -79,9 +79,9 @@ register_rest_field('race', 'rankings', array(
           SELECT
             users.ID AS id,
             users.display_name AS name,
-            TRUNCATE(session_average_speed_kmh.meta_value, 2) AS average_speed_kmh,
-            TRUNCATE(session_duration_minutes.meta_value, 2) AS duration_minutes,
-            TRUNCATE(session_distance_km.meta_value, 2) AS distance_km
+            TRUNCATE(averages.meta_value, 2) AS average_speed_kmh,
+            TRUNCATE(durations.meta_value, 2) AS duration_minutes,
+            TRUNCATE(distances.meta_value, 2) AS distance_km
           FROM {$wpdb->posts} AS sessions
           JOIN {$wpdb->users} AS users ON users.ID = sessions.post_author
           LEFT JOIN {$wpdb->usermeta} AS race_payments ON (race_payments.user_id = users.ID AND race_payments.meta_key = 'race_payments' AND race_payments.meta_value = '{$object['id']}')
