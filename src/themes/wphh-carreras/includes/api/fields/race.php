@@ -96,7 +96,7 @@ register_rest_field('race', 'rankings', array(
           where sessions.post_type = 'session'
           and sessions.post_status = 'publish'
           and sessions.post_parent = {$object['id']}
-          and term_taxonomies.term_id = {$modality->term_id}
+          and taxonomies.term_id = {$modality->term_id}
           and (isnull(race_distances.meta_value) or truncate(distances.meta_value, 2) >= truncate(race_distances.meta_value, 2))
           and (isnull(if(race_oids.meta_value, race_oids.meta_value, null)) or race_payments.meta_value is not null)
           and averages.meta_value > 0
